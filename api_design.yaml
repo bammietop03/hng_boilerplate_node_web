@@ -1,0 +1,832 @@
+openapi: 3.0.0
+info:
+  title: HNG Boilerplate API
+  description: Comprehensive API for managing users, organizations, authentication, messaging, payments, and more.
+  version: 1.0.0
+servers:
+  # Added by API Auto Mocking Plugin
+  # Added by API Auto Mocking Plugin
+  - description: SwaggerHub API Auto Mocking
+    url: https://app.swaggerhub.com/apis-docs/BAMMIETOP/HNGstage3/1.0.0
+
+
+paths:
+  /auth/login:
+    post:
+      summary: User login
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Invalid credentials
+
+  /auth/register:
+    post:
+      summary: User registration
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+          
+  /admin/register:
+    post:
+      summary: Superadmin registration
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '201':
+          description: Superadmin registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Invalid input
+
+  /auth/magic-link:
+    post:
+      summary: Send magic link for authentication
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MagicLinkRequest'
+      responses:
+        '200':
+          description: Magic link sent
+        '400':
+          description: Invalid email
+
+  /auth/social/{provider}/callback:
+    get:
+      summary: Social authentication callback
+      tags:
+        - Authentication
+      parameters:
+        - name: provider
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [google, facebook, twitter]
+      responses:
+        '200':
+          description: Social login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Social login failed
+
+  /api/users:
+    get:
+      summary: Get all users
+      tags:
+        - Users
+      responses:
+        '200':
+          description: A list of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+  /api/users/{userId}:
+    get:
+      summary: Get a user by ID
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+    put:
+      summary: Update a user by ID
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: User not found
+
+    delete:
+      summary: Delete a user by ID
+      tags:
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: User deleted
+        '404':
+          description: User not found
+
+  /api/organisations:
+    get:
+      summary: Get all organisations
+      tags:
+        - Organisations
+      responses:
+        '200':
+          description: A list of organisations
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organisation'
+    post:
+      summary: Create a new organization
+      tags:
+        - Organisations
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationCreate'
+      responses:
+        '201':
+          description: Organisation created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+
+  /api/organisations/{orgId}:
+    get:
+      summary: Get an organisation by ID
+      tags:
+        - Organisations
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Organisation details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '404':
+          description: Organisation not found
+
+    put:
+      summary: Update an organisation by ID
+      tags:
+        - Organisations
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganisationUpdate'
+      responses:
+        '200':
+          description: Organisation updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Organisation'
+        '404':
+          description: Organization not found
+
+    delete:
+      summary: Delete an organisation by ID
+      tags:
+        - Organisations
+      parameters:
+        - name: orgId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Organisation deleted
+        '404':
+          description: Organisation not found
+          
+  /api/organisations/{orgId}/users:
+    post:
+        summary: Add user to an organisation
+        tags:
+        - Organisations
+        parameters:
+          - name: orgId
+            in: path
+            required: true
+            schema:
+              type: string
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganisationAddUser'
+        responses:
+          '200':
+            description: User Added to Organisation
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/OrganisationAddUserRes'
+
+  /api/settings:
+    get:
+      summary: Get user settings
+      tags:
+        - Settings
+      responses:
+        '200':
+          description: User settings
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+    put:
+      summary: Update user settings
+      tags:
+        - Settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SettingsUpdate'
+      responses:
+        '200':
+          description: Settings updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Settings'
+
+
+  /api/payments:
+    post:
+      summary: Create a new payment
+      tags:
+        - Payments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+    
+  /api/payments/{paymentId}:
+    get:
+      summary: Get payment details
+      tags:
+        - Payments
+      parameters:
+        - name: paymentId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Payment details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+                
+  /api/blog/posts:
+    get:
+      summary: Get all blog posts by a user
+      tags:
+        - Posts
+      responses:
+        '200':
+          description: A list of blog posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Post'
+        '500':
+          description: Internal server error
+    post:
+      summary: Create a new blog post
+      tags:
+        - Posts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /api/blog/posts/{blogId}:
+    get:
+      summary: Gets a single blog post by it's id
+      tags:
+        - Posts
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: The post id
+      responses:
+        '200':
+          description: A single blog post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+    put:
+      summary: Update a blog post by it's id
+      tags:
+        - Posts
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: The post id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePost'
+      responses:
+        '200':
+          description: Post updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Bad request
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Deletes a blog post by it's id
+      tags:
+        - Posts
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: The post id
+      responses:
+        '204':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+          
+  /api/blog/{blogId}/comment:
+    get:
+      summary: Get all Comment on a posts
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: The Blog id
+      responses:
+        '200':
+          description: A list of Comment on a Post
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '500':
+          description: Internal server error
+          
+    post:
+      summary: Add a new comment on a blog post
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: blogId
+          required: true
+          schema:
+            type: string
+          description: The Blog id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComment'
+      responses:
+        '201':
+          description: Comment created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '500':
+          description: Internal server error
+
+  /api/blog/comment/{commentId}:
+    put:
+      summary: Update a comment by it's id
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+          description: The Comment id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateComment'
+      responses:
+        '200':
+          description: Comment updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Bad request
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+    delete:
+      summary: Deletes a comment by it's id
+      tags:
+        - Comments
+      parameters:
+        - in: path
+          name: commentId
+          required: true
+          schema:
+            type: string
+          description: The post id
+      responses:
+        '204':
+          description: Post deleted successfully
+        '404':
+          description: Post not found
+        '500':
+          description: Internal server error
+
+
+  
+components:
+  schemas:
+    LoginRequest:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+      required:
+        - email
+        - password
+
+    RegisterRequest:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        phone:
+          type: string
+      required:
+        - firstName
+        - lastName
+        - email
+        - password
+        - phone
+
+    MagicLinkRequest:
+      type: object
+      properties:
+        email:
+          type: string
+      required:
+        - email
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: '#/components/schemas/User'
+
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    UserUpdate:
+      type: object
+      properties:
+        firstName:
+          type: string
+        lastName:
+          type: string
+        email:
+          type: string
+        phone:
+          type: string
+        password:
+          type: string
+
+    Organisation:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    OrganisationCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+      required:
+        - name
+
+    OrganisationUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+          
+    OrganisationAddUser:
+      type: object
+      properties:
+        userId:
+          type: string
+          
+    OrganisationAddUserRes:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+
+    Settings:
+      type: object
+      properties:
+        language:
+          type: string
+        region:
+          type: string
+
+    SettingsUpdate:
+      type: object
+      properties:
+        language:
+          type: string
+        region:
+          type: string
+
+    PaymentRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+        user_id:
+          type: string
+      required:
+        - amount
+        - currency
+        - method
+        - user_id
+
+    Payment:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
+        currency:
+          type: string
+        method:
+          type: string
+        user_id:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+          
+    CreatePost:
+      type: object
+      properties:
+        title:
+          type: string
+          example: 'My First Blog Post'
+        content:
+          type: string
+          example: 'This is the content of the blog post.'
+    Post:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '60c72b2f9f1b2c001c8e4e8b'
+        title:
+          type: string
+          example: 'My First Blog Post'
+        content:
+          type: string
+          example: 'This is the content of the blog post.'
+        user_id:
+          type: string
+          example: '60e3js792jn6bd329jdns8'
+        created_at:
+          type: string
+          format: date-time
+          example: '2023-07-13T14:52:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2023-07-13T14:52:00z'
+          
+    CreateComment:
+      type: object
+      properties:
+        comment:
+          type: string
+          example: 'My First Comment on a Blog Post'
+    Comment:
+      type: object
+      properties:
+        id:
+          type: string
+          example: '60c72b2f9f1b2c001c8e4e8b'
+        comment:
+          type: string
+          example: 'My First Comment on a Blog Post'
+        user_id:
+          type: string
+          example: '60e3js792jn6bd329jdns8'
+        created_at:
+          type: string
+          format: date-time
+          example: '2023-07-13T14:52:00Z'
+        updated_at:
+          type: string
+          format: date-time
+          example: '2023-07-13T14:52:00z'
+          
